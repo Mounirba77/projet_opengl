@@ -1,149 +1,141 @@
-#include "miwidget.h"
+#include "miWidget.h"
+#include <QOpenGLFunctions>
+#include <QPainter>
 
-miWidget::miWidget(QWidget *parent):QOpenGLWidget(parent)
+miWidget::miWidget(QWidget *parent) : QOpenGLWidget(parent), translationX(0), translationY(0), translationZ(0),
+    scaleX(1.0), scaleY(1.0), scaleZ(1.0) // Initialiser les valeurs d'échelle par défaut
 {
-
+    // Constructeur, initialisation des valeurs par défaut
 }
 
 void miWidget::initializeGL()
 {
- initializeOpenGLFunctions();
-
- //glClearColor(0.0, 0.0, 0.0, 0.0);
-         glEnable(GL_DEPTH_TEST);
-
+    initializeOpenGLFunctions();
+    glEnable(GL_DEPTH_TEST);  // Activer le test de profondeur
 }
 
 void miWidget::resizeGL(int w, int h)
 {
-
-glViewport(0, 0, w, h);
-/*glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   */
-   //glOrtho(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
-
+    glViewport(0, 0, w, h);  // Ajuster la vue OpenGL lors du redimensionnement
 }
 
 void miWidget::paintGL()
 {
-/*
-glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Effacer l'écran et le buffer de profondeur
+    glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_SMOOTH);
 
-glColor3f(1,0,0);
+    glLoadIdentity();  // Réinitialiser les transformations
 
-glBegin(GL_TRIANGLES);
-      glColor3f(1.0f, 0.0f, 0.0f);  // activamos el color rojo
-      glVertex3f(-1.0f, 0.0f, 0.0f);
-      glColor3f(0.0f,1.0f, 0.0f);  // activamos el color verde
-      glVertex3f(1.0f,0.0f, 0.0f);
-      glColor3f(0.0f, 0.0f, 1.0f);  // activamos el color azul
-      glVertex3f(0.0f, 1.0f, 0.0f);
-glEnd();
- glFlush();*/
+    // Appliquer les transformations de translation
+    glTranslatef(translationX, translationY, translationZ);
 
-    //  Borrar pantalla y Z-buffer
-      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-      glDepthFunc(GL_LESS);
-      glEnable(GL_DEPTH_TEST);
-      glShadeModel(GL_SMOOTH);
-      // Resetear transformaciones
-      glLoadIdentity();
+    // Appliquer les transformations de mise à l'échelle
+    glScalef(scaleX, scaleY, scaleZ);
 
-      // Otras transformaciones
-      // glTranslatef( 0.1, 0.0, 0.0 );      // No incluido
-      // glRotatef( 180, 0.0, 1.0, 0.0 );    // No incluido
+    // Appliquer les transformations de rotation
+    glRotatef(rotate_x, 1.0, 0.0, 0.0);
+    glRotatef(rotate_y, 0.0, 1.0, 0.0);
+    glRotatef(rotate_z, 0.0, 0.0, 1.0);
 
-      // Rotar cuando el usuario cambie “rotate_x” y “rotate_y”
-      glRotatef( rotate_x, 1.0, 0.0, 0.0 );
-      glRotatef( rotate_y, 0.0, 1.0, 0.0 );
-      glRotatef( rotate_z, 0.0, 0.0, 1.0 );
+    // Dessiner un cube avec des couleurs différentes pour chaque face
+    // Front face (multicolored)
+    glBegin(GL_POLYGON);
+    glColor3f(1.0, 0.0, 0.0); glVertex3f(0.05, -0.05, -0.05);
+    glColor3f(0.0, 1.0, 0.0); glVertex3f(0.05, 0.05, -0.05);
+    glColor3f(0.0, 0.0, 1.0); glVertex3f(-0.05, 0.05, -0.05);
+    glColor3f(1.0, 0.0, 1.0); glVertex3f(-0.05, -0.05, -0.05);
+    glEnd();
 
+    // Back face (white)
+    glBegin(GL_POLYGON);
+    glColor3f(1.0, 1.0, 1.0); glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(-0.05, -0.05, 0.05);
+    glEnd();
 
-      // Otras transformaciones
-      // glScalef( 2.0, 2.0, 0.0 );          // No incluido
+    // Right face (purple)
+    glBegin(GL_POLYGON);
+    glColor3f(1.0, 0.0, 1.0); glVertex3f(0.05, -0.05, -0.05);
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, -0.05, 0.05);
+    glEnd();
 
-      //LADO FRONTAL: lado multicolor
-      glBegin(GL_POLYGON);
+    // Left face (green)
+    glBegin(GL_POLYGON);
+    glColor3f(0.0, 1.0, 0.0); glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(-0.05, 0.05, 0.05);
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(-0.05, -0.05, -0.05);
+    glEnd();
 
-      glColor3f( 1.0, 0.0, 0.0 );
-      glVertex3f(  0.5, -0.5, -0.5 );      // P1 es rojo
-      glColor3f( 0.0, 1.0, 0.0 );
-      glVertex3f(  0.5,  0.5, -0.5 );      // P2 es verde
-      glColor3f( 0.0, 0.0, 1.0 );
-      glVertex3f( -0.5,  0.5, -0.5 );      // P3 es azul
-      glColor3f( 1.0, 0.0, 1.0 );
-      glVertex3f( -0.5, -0.5, -0.5 );      // P4 es morado
+    // Top face (blue)
+    glBegin(GL_POLYGON);
+    glColor3f(0.0, 0.0, 1.0); glVertex3f(0.05, 0.05, 0.05);
+    glVertex3f(0.05, 0.05, -0.05);
+    glVertex3f(-0.05, 0.05, -0.05);
+    glVertex3f(-0.05, 0.05, 0.05);
+    glEnd();
 
-      glEnd();
+    // Bottom face (red)
+    glBegin(GL_POLYGON);
+    glColor3f(1.0, 0.0, 0.0); glVertex3f(0.05, -0.05, -0.05);
+    glVertex3f(0.05, -0.05, 0.05);
+    glVertex3f(-0.05, -0.05, 0.05);
+    glVertex3f(-0.05, -0.05, -0.05);
+    glEnd();
 
-      // LADO TRASERO: lado blanco
-      glBegin(GL_POLYGON);
-      glColor3f(   1.0,  1.0, 1.0 );
-      glVertex3f(  0.5, -0.5, 0.5 );
-      glVertex3f(  0.5,  0.5, 0.5 );
-      glVertex3f( -0.5,  0.5, 0.5 );
-      glVertex3f( -0.5, -0.5, 0.5 );
-      glEnd();
+    // Dessiner des axes pour visualiser les directions X, Y, Z
+    graficarLineas();
 
-      // LADO DERECHO: lado morado
-      glBegin(GL_POLYGON);
-      glColor3f(  1.0,  0.0,  1.0 );
-      glVertex3f( 0.5, -0.5, -0.5 );
-      glVertex3f( 0.5,  0.5, -0.5 );
-      glVertex3f( 0.5,  0.5,  0.5 );
-      glVertex3f( 0.5, -0.5,  0.5 );
-      glEnd();
-
-      // LADO IZQUIERDO: lado verde
-      glBegin(GL_POLYGON);
-      glColor3f(   0.0,  1.0,  0.0 );
-      glVertex3f( -0.5, -0.5,  0.5 );
-      glVertex3f( -0.5,  0.5,  0.5 );
-      glVertex3f( -0.5,  0.5, -0.5 );
-      glVertex3f( -0.5, -0.5, -0.5 );
-      glEnd();
-
-      // LADO SUPERIOR: lado azul
-      glBegin(GL_POLYGON);
-      glColor3f(   0.0,  0.0,  1.0 );
-      glVertex3f(  0.5,  0.5,  0.5 );
-      glVertex3f(  0.5,  0.5, -0.5 );
-      glVertex3f( -0.5,  0.5, -0.5 );
-      glVertex3f( -0.5,  0.5,  0.5 );
-      glEnd();
-
-      // LADO INFERIOR: lado rojo
-      glBegin(GL_POLYGON);
-      glColor3f(   1.0,  0.0,  0.0 );
-      glVertex3f(  0.5, -0.5, -0.5 );
-      glVertex3f(  0.5, -0.5,  0.5 );
-      glVertex3f( -0.5, -0.5,  0.5 );
-      glVertex3f( -0.5, -0.5, -0.5 );
-      glEnd();
-
-
-      graficarLineas();
-      glFlush();
-        this->makeCurrent();
-
+    glFlush();  // Exécuter les commandes OpenGL
+    this->makeCurrent();
 }
 
 void miWidget::graficarLineas()
 {
+    glBegin(GL_LINES);
+    glColor3f(1, 0, 0); glVertex3f(0, 0, 0); glVertex3f(20, 0, 0);  // Axe X (rouge)
+    glColor3f(1, 1, 0); glVertex3f(0, 0, 0); glVertex3f(0, 20, 0);  // Axe Y (jaune)
+    glColor3f(0, 1, 1); glVertex3f(0, 0, 0); glVertex3f(0, 0, 20);  // Axe Z (cyan)
+    glEnd();
+}
 
-        glBegin(GL_LINES);
-            glColor3f(1,0,0);
-            glVertex3f(0,0,0);
-            glVertex3f(20,0,0);
+void miWidget::setTranslationX(float value)
+{
+    translationX = value;
+    update();  // Mettre à jour le widget après chaque changement
+}
 
-            glColor3f(1,1,0);
-            glVertex3f(0,0,0);
-            glVertex3f(0,20,0);
+void miWidget::setTranslationY(float value)
+{
+    translationY = value;
+    update();  // Mettre à jour le widget après chaque changement
+}
 
-            glColor3f(0,1,1);
-            glVertex3f(0,0,0);
-            glVertex3f(0,0,20);
-        glEnd();
+void miWidget::setTranslationZ(float value)
+{
+    translationZ = value;
+    update();  // Mettre à jour le widget après chaque changement
+}
 
+void miWidget::setScaleX(float value)
+{
+    scaleX = value;
+    update();  // Mettre à jour le widget après chaque changement
+}
+
+void miWidget::setScaleY(float value)
+{
+    scaleY = value;
+    update();  // Mettre à jour le widget après chaque changement
+}
+
+void miWidget::setScaleZ(float value)
+{
+    scaleZ = value;
+    update();  // Mettre à jour le widget après chaque changement
 }
